@@ -3,7 +3,9 @@
     测试标准
     <button @click="handleClick">点击儿子</button>
     <p>$attrs: {{$attrs}}</p>
+    <p>$listeners: {{$listeners}}</p>
     <!-- 主要为了解决将1.vue中的方法，传递给testChild.vue，也就是爷爷向孙子传值 -->
+    <!-- $attrs主要是存放没有被子组件继承的父组件数据对象，而$listeners将父组件放下继承下来传下去 -->
     <TestChild v-bind="$attrs" v-on="$listeners"/>
   </div>
 </template>
@@ -13,7 +15,7 @@ import TestChild from './testChild.vue'
 export default {
   name: 'test',
   props: {
-    msg: String
+    msg: {String}
   },
   data() {
       return {
@@ -21,8 +23,11 @@ export default {
         father: "我是爸爸的儿子"
       }
   },
+  // 配合$attrs使用，默认为true，如果没有被儿子组件接收的爷爷组件传递的参数，会绑定在儿子组件的根节点上显示出来，同时这些属性可以被孙子组件接收
+  // 但如果为false，那么这样的默认行为，会被屏蔽，可以被孙子接收的数据，也不会现实在儿子组件的根节点上
+  inheritAttrs: false,
   created() {
-    console.info(this.$attrs)
+    // console.info(this.$attrs)
   },
   methods: {
       handleClick() {
@@ -32,6 +37,9 @@ export default {
           this.$emit("parentAction", "儿子改变了爸爸")
           // this.$parent可以直接调用使用该子组件的父组件
           this.$parent.handleClickParent("儿子在喊爸爸做事")
+
+          // 接收给孙子传的值
+          // console.info(this.myData)
       },
       handleClickChild(e) {
           console.info("我是儿子组件的内部方法")

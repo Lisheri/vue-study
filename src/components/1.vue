@@ -2,7 +2,7 @@
   <div class="hello">
     爷爷组件
     <!-- 第一种通信方式，采用props和$emit的父子组件通信 -->
-    <Test :msg="child" @parentAction="parentAction"/>
+    <Test :msg="child" :myData="child" @parentAction="parentAction" prop="data"/>
     <button @click="handleClick">父亲组件</button>
   </div>
 </template>
@@ -24,13 +24,17 @@ export default {
   },
   created() {
     // 在created周期中还是空数组
-    console.info(this.$children)
+    console.info(this.$children[0])
   },
   mounted() {
     // 在mounted生命周期中已经渲染完成
     // 获取子组件data的数组以下两种方法均可以
     console.info(`儿子: ${this.$children[0].me} 爸爸:${this.$children[0].father}`)
     console.info(`儿子: ${this.$children[0].$data.me} 爸爸: ${this.$children[0].father}`)
+  },
+  // 顶级组件provide提供一些参数
+  provide: {
+    foo: "bar"
   },
   methods: {
       parentAction(e) {

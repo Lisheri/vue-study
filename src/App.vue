@@ -2,16 +2,24 @@
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Actionone />
+    <Brother />
+    <SmallBrother />
   </div>
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
-
+import Actionone from './components/1.vue'
+import Brother from './components/brother.vue'
+import SmallBrother from './components/smallBrother.vue'
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    HelloWorld,
+    Actionone,
+    Brother,
+    SmallBrother
   }
 }
 </script>

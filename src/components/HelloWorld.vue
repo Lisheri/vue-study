@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+    <button @click="handleClick">点击此处展开或隐藏</button>
     <h1>{{ msg }}</h1>
   </div>
 </template>
@@ -9,6 +10,11 @@ export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  methods: {
+    handleClick() {
+      this.$emit("click")
+    }
   }
 }
 </script>

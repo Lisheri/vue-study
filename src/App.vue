@@ -1,10 +1,9 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-    <Actionone />
-    <Brother />
-    <SmallBrother />
+    <HelloWorld :msg='isOrNo' @click="isShow"/>
+    <Brother v-show="showCross"/>
+    <SmallBrother v-show="showCross"/>
+    <Actionone :showCross="showCross"/>
   </div>
 </template>
 
@@ -15,11 +14,24 @@ import Brother from './components/brother.vue'
 import SmallBrother from './components/smallBrother.vue'
 export default {
   name: 'App',
+  data() {
+    return {
+      showCross: false,
+      isOrNo: "展示组件传参"
+    }
+  },
   components: {
     HelloWorld,
     Actionone,
     Brother,
     SmallBrother
+  },
+  methods: {
+    isShow() {
+      // debugger
+      this.showCross = !this.showCross
+      this.isOrNo = this.isOrNo === "展示组件传参" ? "隐藏组件传参" : "展示组件传参"
+    }
   }
 }
 </script>

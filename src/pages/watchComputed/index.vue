@@ -6,6 +6,9 @@
         <a-button type="primary" @click="full">点击改变text</a-button>
         <a-input v-model="question" style="width:200px;marginTop: 20px;"></a-input>
         <span>{{answer}}</span>
+        <div>
+            <bindClass />
+        </div>
     </div>
 </template>
 
@@ -14,6 +17,7 @@
 import debounce from 'loadsh/debounce'
 import capitalize from 'loadsh/capitalize'
 import axios from 'axios'
+import bindClass from './bindClass'
 export default {
     data() {
         return {
@@ -70,7 +74,8 @@ export default {
                 this.answer = 'Error! Could not reach the API. ' + res.statusText
             }
         }
-    }
+    },
+    components: {bindClass}
 }
 </script>
 

@@ -3,11 +3,12 @@
     爷爷组件
     <!-- 第一种通信方式，采用props和$emit的父子组件通信 -->
     <Test :msg="child" :myData="child" @parentAction="parentAction" prop="data" v-show="showCross"/>
-    <button @click="handleClick('/directive')">自定义指令</button>
-    <button @click="handleClick('/jsx')">render函数</button>
-    <button @click="handleClick('/slot')">vue插槽</button>
-    <button @click="handleClick('/reduce')">数组reduce用法</button>
-    <button @click="handleClick('/computed')">计算属性</button>
+    <a-button @click="handleClick('/directive')">自定义指令</a-button>
+    <a-button @click="handleClick('/jsx')">render函数</a-button>
+    <a-button @click="handleClick('/slot')">vue插槽</a-button>
+    <a-button @click="handleClick('/reduce')">数组reduce用法</a-button>
+    <a-button @click="handleClick('/computed')">计算属性</a-button>
+    <a-button @click="handleClick('/eventHanding')">事件处理</a-button>
     <div class="content" id="page-content">
       <router-view />
     </div>

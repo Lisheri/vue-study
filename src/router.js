@@ -7,6 +7,7 @@ const InSlot = () => import('@/pages/slots/inSlot.vue')
 const ReduceArray = () => import('@/pages/reduceArray/reduceArray.vue')
 const Computed = () => import('@/pages/watchComputed/index.vue')
 const eventHandler = () => import('@/pages/eventHandler/index.vue')
+const formBind = () => import('@/pages/formInputBind/index.vue')
 
 const originalPush = Router.prototype.push
 Router.prototype.push = function push(location) {
@@ -51,6 +52,11 @@ export default new Router({
             path: '/eventHanding',
             name: 'eventHanding',
             component: eventHandler
+        },
+        {
+            path: '/formBind',
+            name: 'formBind',
+            component: formBind
         }
     ]
 })

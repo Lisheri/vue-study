@@ -1,4 +1,6 @@
 <script>
+import InputVModel from "./inputVmodel";
+import alertBox from "./alertBox";
 export default {
   data() {
     return {
@@ -11,13 +13,14 @@ export default {
       optionsArr: ["jack", "tom", "fuck"],
       optionsArr2: ["jackx", "tomx", "fuckx"],
       radios: "one",
-      radio2: 'one',
-      selectedVal1: '',
+      radio2: "one",
+      selectedVal1: "",
       selectOptionArr1: [
-          {text: 'One', value: 'A'},
-          {text: 'Two', value: 'B'},
-          {text: 'Three', value: 'C'}
-      ]
+        { text: "One", value: "A" },
+        { text: "Two", value: "B" },
+        { text: "Three", value: "C" }
+      ],
+      modelVal: "测试v-model"
     };
   },
   methods: {
@@ -32,7 +35,9 @@ export default {
       console.info(this.checkedNames2);
     }
   },
-  render() {
+  components: { InputVModel, alertBox },
+  render(h) {
+    const Title = <h1 slot="title">我是title_slot</h1>
     return (
       <div>
         <h1>表单数据绑定</h1>
@@ -163,10 +168,10 @@ export default {
               // 单选按钮
             }
             <a-radio-group v-model={this.radio2}>
-                <a-radio id="one" value="one" />
-                <label for="one">One</label>
-                <a-radio id="two" value="two" />
-                <label for="two">Two</label>
+              <a-radio id="one" value="one" />
+              <label for="one">One</label>
+              <a-radio id="two" value="two" />
+              <label for="two">Two</label>
             </a-radio-group>
             <br />
             <span>{`Checked names:${this.radio2}`}</span>
@@ -176,13 +181,39 @@ export default {
               // 单选v-for渲染
             }
             <select v-model={this.selectedVal1}>
-                <option value="" disabled>请选择...</option>
-                {
-                    this.selectOptionArr1.map(item => <option vlaue={item.value}>{item.text}</option>)
-                }
+              <option value="" disabled>
+                请选择...
+              </option>
+              {this.selectOptionArr1.map(item => (
+                <option vlaue={item.value}>{item.text}</option>
+              ))}
             </select>
             <br />
             <span>{`Checked names:${this.selectedVal1}`}</span>
+          </a-card>
+          <a-card hoverable style="width: 240px" class="divbox">
+            <InputVModel v-model={this.modelVal} />
+            <span>{this.modelVal}</span>
+          </a-card>
+          <a-card hoverable style="width: 240px" class="divbox">
+            <alertBox
+              titleSlot={Title}
+              {...{
+                scopedSlots: {
+                  sub: ({injectProps}) => (
+                    <div>
+                      <h3>{injectProps.key}</h3>
+                      <span>{injectProps.value}</span>
+                    </div>
+                  ),
+                  testSlot: () => {
+                    return (<span>我的天</span>)
+                  },
+                }
+              }}
+            >
+              卧槽
+            </alertBox>
           </a-card>
         </div>
       </div>

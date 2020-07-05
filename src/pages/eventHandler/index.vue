@@ -14,7 +14,7 @@ export default {
             console.info("阻止单机事件继续传播")
         }
     },
-    render() {
+    render(h) {
         // 事件修饰符
         // 在
         return (

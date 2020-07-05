@@ -61,7 +61,7 @@ export default {
       }
     }
   },
-  render() {
+  render(h) {
     return (
       <div>
         <p

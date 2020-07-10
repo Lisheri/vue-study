@@ -10,6 +10,8 @@
     <a-button @click="handleClick('/computed')">计算属性</a-button>
     <a-button @click="handleClick('/eventHanding')">事件处理</a-button>
     <a-button @click="handleClick('/formBind')">表单事件绑定</a-button>
+    <a-button @click="handleClick('/props')">props传递汇总</a-button>
+    <a-button @click="handleClick('./SlotJsx')">jsx的插槽写法</a-button>
     <div class="content" id="page-content">
       <router-view />
     </div>

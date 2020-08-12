@@ -170,4 +170,22 @@ console.info(!window.abc) // true
     - 值类型赋值的时候，直接在栈中开辟内存，key为名，value就是他的值
     - 引用类型在栈中开辟内存，同时在堆中存储地址，栈中key为名，value存储的为内存地址名，该内存地址名对应堆中key，堆中value就是引用类型的值，因此引用类型直接赋值，就会将该引用类型在堆中的地址，赋值给新的引用类型变量
 + 手写深拷贝
+```
+function deepClone(obj = {}) {
+    let result = obj instanceof Array ? [] : {}
+    if (typeof obj === "object") {
+        Object.keys(obj).forEach(key => {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                result[key] = deepClone(obj[key])
+            }
+        })
+    } else {
+        return obj
+    }
+    return result
+}
+```
 
+## 原型和原型链
+在ES2019中，用了一句短短的话，介绍了一下原型链--prototype chain
+a prototype may have a non-null implicit reference to its prototype, and so on; this is called the prototype chain

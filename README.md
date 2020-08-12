@@ -4,7 +4,6 @@
 
 #### 题目
 + typeof能判断哪些类型？
-typeof可以判断的类型是：undefined、 null、boolean、number、bigint、string、symbol、object、function
 + 何时使用 === 何时使用 ==
 + 值类型和引用类型的区别
 + 手写深拷贝
@@ -110,4 +109,65 @@ const obj2 = deepClone(obj1)
 obj2.address.city = "shanghai"
 console.info(obj1.address.city) // beijing
 ```
+
+#### 变量计算
++ 字符串拼接
++ == 运算符
++ if语句，三元表达式等逻辑运算
+
+```
+// 字符串拼接
+const a = 100 + 10; // 110
+const b = 100 + "10"; // "10010"
+const c = true + "10"; // "true10"
+
+// ==运算符
+100 == "100" // true
+0 == "" // true
+0 == false // true
+false == "" // true
+null == undefined // true
+
+// 除了判断是否为null或者undefined时，可以使用一个==之外，其他一律用 ===
+// 其余==和===的规则，见望远镜书
+
+// if语句和逻辑运算
+// if判断实际上是判断的truly变量和falsely变量
+
+//truly变量,两步true运算为true
+!!a === true 
+//falsely变量, 两步false运算为false
+!!a === false
+
+// 以下是falsely变量。除此之外都是truly变量
+!!0 === false
+!!NaN === false
+!! '' === false
+!! null === false
+!! undefined === false
+!! false === false
+
+// 逻辑运算
+
+// 逻辑与如果第一个值是truely变量则往后判断返回第二个值
+console.info(10 && 0) // 0
+// 逻辑或如果第一个值是一个truely变量则返回，如果是falsely变量则往后判断
+console.info('' || 'abc') // 'abc'
+console.info(!window.abc) // true
+```
+
+#### 题目解答
++ typeof能够判断哪些类型
+    - 识别所有值类型 
+    undefined number string symbol bigint boolean
+    - 识别函数
+    function
+    - 判断是否是引用类型(不可在细分)
+    object
++ 何时使用=== 何时使用==
+    - 除了判断是null或者undefined之外，其他都用===
++ 值类型和引用类型的区别
+    - 值类型赋值的时候，直接在栈中开辟内存，key为名，value就是他的值
+    - 引用类型在栈中开辟内存，同时在堆中存储地址，栈中key为名，value存储的为内存地址名，该内存地址名对应堆中key，堆中value就是引用类型的值，因此引用类型直接赋值，就会将该引用类型在堆中的地址，赋值给新的引用类型变量
++ 手写深拷贝
 

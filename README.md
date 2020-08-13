@@ -189,3 +189,170 @@ function deepClone(obj = {}) {
 ## 原型和原型链
 在ES2019中，用了一句短短的话，介绍了一下原型链--prototype chain
 a prototype may have a non-null implicit reference to its prototype, and so on; this is called the prototype chain
+
+### 题目
++ 如何准确判断一个变量是不是数组?
++ 手写一个简易的Jquer，考虑插件和扩展性
++ class的原型本质，怎么理解
+
+### class和继承
+
+#### class
+class可以看作一个模板，内部有constructor、属性和方法
+
+比如写一个学生类
+```
+// 类
+class Student {
+    constructor(name, number) {
+        // 这里的this指向当前构建的实例
+        this.name = name;
+        this.number = number;
+    }
+    sayHi() {
+        console.info(`姓名: ${this.name}, 学号: ${this.number}`)
+    }
+}
+
+// 通过类声明一个实例
+let xialuo = new Student("夏洛", 201613160911)
+console.info(xialuo.name);
+console.info(xialuo.number);
+xialuo.sayHi()
+
+```
+
+#### ES2020新增使用#定义类的私有成员
+#### 比如 
+```
+class People {
+    #money
+    constructor(name, major) {
+        this.name = name
+        this.major = major
+        this.#money = major !== "学生" ? "screet" : "no money"
+    }
+    getMoney() {
+        return this.#money
+    }
+    hasMoney() {
+        console.info(`${this.name} has ${this.#money}`)
+    }
+}
+```
+
+#### 继承
++ extends关键字
++ super执行父类的构造函数
++ 扩展和重写父类的一些方法
+
+```
+// * 父类
+class People {
+    constructor(name) {
+        this.name = name
+    }
+    #testself = "wc"
+    eat() {
+        console.info(`${this.name} eat something and ${this.#testself}`)
+    }
+}
+
+// * 子类
+class Student extends People {
+    #testself = "mzl"
+    constructor(name, number) {
+        super(name)
+        this.number = number
+    }
+    sayHi() {
+        console.info(`姓名: ${this.name}, 学号: ${this.number}`)
+    }
+    getSelf() {
+        return this.#testself
+    }
+}
+
+// * 子类
+class Teacher extends People {
+    #money
+    constructor(name, major) {
+        super(name)
+        this.major = major
+        this.#money = this.major === "语文" ? 9000 : ""
+    }
+    teach() {
+        console.info(`${this.name} teach ${this.major}`)
+    }
+    getMoney() {
+        console.info(this.#money)
+    }
+}
+
+let xialuo = new Student("夏洛", 201613160911)
+console.log(xialuo.name); // 夏洛
+console.info(xialuo.number); // 201613160911
+xialuo.sayHi() // 姓名：夏洛，学号： 201613160911
+xialuo.eat() // 夏洛eat something and wc
+console.info(xialuo.getSelf()) // wc
+
+let wang = new Teacher("王老师", "语文")
+console.info(wang.name) // 王老师
+console.info(wang.major) // 语文
+wang.teach() // 王老师 teach 语文
+wang.eat() // 王老师 eat something and wc
+wang.getMoney() // 9000
+```
+
+#### 类型判断 instanceof
+
+##### 如上三个类的一些判断
++ xialuo instanceof Student
+// true
++ xialuo instanceof People
+// true
++ xialuo instanceof Object
+// true
+
++ [] instanceof Array
+// true
++ [] instanceof Object
+// true
++ {} instanceof Object
+// true
+
+A instanceof B // 只要A是B构建出来的，就是true
+
+所有的引用类型instanceof一个Object都是true
+Object也是所有class的父类
+
+typeof Student // function
+typeof People // function
+
+class本质只是一个语法糖，本质上还是通过function来实现的
+
+以上面继承的为例子
+```
+xialuo.__proto__; // 这个东西里面有一个constructor和一个sayHi()
+
+// 此时可以使用
+xialuo.__proto__.sayHi() //得到的结果是
+// 姓名: undefined, 学号: undefined
+Student.prototype; // 也是一个sayHi和constructor
+
+// 实际上Prototype是一个隐式原型，而__proto__是一个显式原型
+
+// 并且xialuo.__proto__ = Student.prototype
+// 也就是说实例的__proto__和类的prototype指向的是同一处
+
+```
+
+#### 原型关系
+ + 每个class都有一个隐式引用prototype
+ + 每一个实例都可以通过一个显式引用__proto__去访问class的隐式引用prototype
+ + 实例的__proto—__指向对应class的prototype
+
+#### 基于原型的执行规则
++ 获取属性xialuo.name或执行方法xialuo.sayHi()时
++ 先在自身的属性和方法中寻找
++ 如果找不到，就去显示引用__proto__中寻找，而这个__proto__恰好就指向了class的隐式引用prototype

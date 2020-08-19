@@ -350,9 +350,50 @@ Student.prototype; // 也是一个sayHi和constructor
 #### 原型关系
  + 每个class都有一个隐式引用prototype
  + 每一个实例都可以通过一个显式引用__proto__去访问class的隐式引用prototype
- + 实例的__proto—__指向对应class的prototype
+ + 实例的__proto__指向对应class的prototype
 
 #### 基于原型的执行规则
 + 获取属性xialuo.name或执行方法xialuo.sayHi()时
 + 先在自身的属性和方法中寻找
 + 如果找不到，就去显示引用__proto__中寻找，而这个__proto__恰好就指向了class的隐式引用prototype
+
+#### 原型链
+说起这个原型链，又要回到ES2019
+在ES2019中，用了一句短短的话，介绍了一下原型链--prototype chain
+a prototype may have a non-null implicit reference to its prototype, and so on; this is called the prototype chain(原型可能具有对其原型的非空隐式引用，依此类推；这称为原型链)
+
+本身__proto__出现就是为了解决在实例中无法直接访问隐式引用prototype，需要使用Object.getPrototypeOf(实例)来访问，于是很多浏览器私自开了一个口直接访问类(构造函数)的原型，这个口，就是__proto__，直到ES2015规范只好向事实低头，将__proto__属性纳入了规范的一部分。
+
+实际上__proto__的实现很简单
+就是在Object的隐式引用prototype上定义了一个叫做__proto__的属性，并且将它挂载到了每一个Object的派生类上，作为一个类似于不可枚举属性的属性，实际上看起来像一个不可枚举属性，但__proto__并不是不可枚举属性，当然，也不是可枚举属性，因为使用Object.getOwnPropertyNames()访问不到该属性
+所以是，表面上看在对象里存在一个__proto__属性，实际上，它只是开发者工具为了方便让开发者查看原型，故意渲染出来的虚拟节点。虽然跟对象的其他属性并列，看起来像一个不可枚举属性，但实际上它并不在该对象中
+访问对象的__proto__触发了Object.prototype上的__proto__的get方法
+
+__proto__实现如下
+```
+let test = {
+    get __proto__() {
+        return Object.getPrototypeOf(this)
+    },
+    set __proto__() {
+        return Object.setPrototypeOf(this, value)
+    }
+}
+```
+
+一条带有子类继承父类的原型链，主要就是子类的隐式引用prototype的显式引用__proto__指向父类的prototype
+同时，在js中，所有的引用类型，都继承自Object，而Object没有父类了，因此Object.__proto__指向空值。
+
+比如在之前的例子中，就有如下一条原型链
+xialuo.__proto__ === Student.prototype
+xialuo.__proto__.__proto__ === Student.prototype.__proto__ === People.prototype
+xialuo.__proto__.__proto__.__proto__ === Student.prototype.__proto__.__proto__ === People.prototype.__proto__ === Objcet.prototype
+
+Object.prototype.__proto__ === null
+
+##### 重要提示
++ class是Es6语法规范，由ECMA委员会发布
++ ECMA只规定语法规则，即我们代码的书写规范，不规定如何实现
++ 以上实现方式都是V8引擎的实现方式，也是主流的
+
+#### JS原型链继承

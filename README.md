@@ -397,3 +397,101 @@ Object.prototype.__proto__ === null
 + 以上实现方式都是V8引擎的实现方式，也是主流的
 
 #### JS原型链继承
+
+在js中，有两类原型继承的方式: 显式原型继承和隐式原型继承
+区别：是否由开发者亲自操作
+##### 显式原型继承
+所谓显式原型继承就是亲自将某一个对象设置为另一个对象的原型
+```
+const obj_a = {a: 1};
+const obj_b = {b: 1};
+Object.setPrototypeOf(obj_b, obj_a); // 将obj_a设置为obj_b的原型
+```
+
+##### 隐式原型继承
+将某些函数称之为constructor, 专门用来做属性初始化
+function User(firstname, lastname) {
+    this.firstname = firstname
+    this.lastname = lastname
+}
+同时约定，constructor函数有一个特殊属性叫做prototype
+User.prototype = Object.create(Object.prototype)
+
+使用new关键字去创建新对象
+然后再内部偷偷的做一个创建对象，关联原型和属性初始化等一系列过程
+function User(firstname, lastname) {
+    this.firstname = firstname
+    this.lastname = lastname
+}
+
+User.prototype = Object.create(Object.prototype)
+const user = new User("Jade", "GU")
+
+实际上这种操作比较繁琐，因此出现了一个叫做字面量的东西，将原来的多个步骤融合成了一步进行操作
+比如说新建一个对象
+let obj = {
+    firstname: "JADE",
+    lastname: "GU"
+}
+
+这个操作实际上是两个步骤融合的
+第一步是使用new Object()去创建一个对象
+第二步是进行原型继承，由于这种继承看不到，因此就是隐式原型继承同时设置属性
+
+##### 两个构造函数之间继承
+```
+// 不需要中间对象版本
+function Human(age, ...args) {
+    this.age = age
+}
+Human.prototype.showAge = function() {
+    console.info(this.age)
+}
+function User(name, ...args) {
+    Human.call(this, ...args)
+    this.name = name
+}
+User.prototype.showName = function() {
+    console.info(this.name)
+}
+User.prototype.constructor = User
+Object.setPrototypeOf(User.prototype, Human.prototype)
+
+// 使用中间对象版
+function Student(name, ...args) {
+    this.name = name || "none"
+}
+Student.prototype.hello = () => {
+    console.info(this.name)
+}
+
+function PrimaryStudent(grade, ...args) {
+    Student.call(this, ...args)
+    this.grade = grade || 1
+}
+// 空函数
+function F() {}
+F.prototype = Student.prototype
+PrimaryStudent.prototype = new F()
+PrimaryStudent.prototype.constructor = PrimaryStudent
+PrimaryStudent.prototype.getGrade = function () {
+    return this.grade;
+}
+
+// 可以封装一个继承的函数
+const inherit = (SuperConstructor, properites) => {
+    let {constructor} = properites
+    let SubConstructor = function(...args) {
+        SuperConstructor.call(this, ...args)
+        constructor.call(this, ...args)
+    }
+
+    SubConstructor.prototypes = {
+        ...properites,
+        constructor: SubConstructor
+    }
+    Object.setPrototypeOf(SubConstructor.prototype, SuperConstructor.prototype)
+
+    return SubConstructor
+}
+```

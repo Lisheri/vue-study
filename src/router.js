@@ -10,6 +10,7 @@ const eventHandler = () => import('@/pages/eventHandler/index.vue')
 const formBind = () => import('@/pages/formInputBind/index.vue')
 const Props = () => import('@/pages/Props/index.vue')
 const SlotJsx = () => import('@/pages/slotsJsx.vue')
+const ScrollTree = () => import('@/pages/scrollTree/scrollTree.vue')
 
 const originalPush = Router.prototype.push
 Router.prototype.push = function push(location) {
@@ -69,6 +70,11 @@ export default new Router({
             path: '/SlotJsx',
             name: 'SlotJsx',
             component: SlotJsx
+        },
+        {
+            path: '/scrollTree',
+            name: 'ScrollTree',
+            component: ScrollTree
         }
     ]
 })

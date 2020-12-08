@@ -12,6 +12,7 @@
     <a-button @click="handleClick('/formBind')">表单事件绑定</a-button>
     <a-button @click="handleClick('/props')">props传递汇总</a-button>
     <a-button @click="handleClick('./SlotJsx')">jsx的插槽写法</a-button>
+    <a-button @click="handleClick('/scrollTree')">vxetable虚拟树</a-button>
     <div class="content" id="page-content">
       <router-view />
     </div>

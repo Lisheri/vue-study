@@ -670,3 +670,291 @@ class People {
 const zhangsan = new People("张三")
 zhangsan.sayHi() // zhangsan对象
 ```
+
+#### Object.is 和 === 的区别?
+=== 作为判断时, 会将 NaN === NaN 判断为false, 并且 +0 和 -0 判断为true, 但实际上这样的方式是错误的, 会造成很多问题
+Object.is做判断, 以上都是相反的, 因此更加规范
+```
+funciton is(x, y) {
+    if (x === y) {
+        // 使用 1/x === 1/y 做判断主要是因为 1/+0 为 +infinity; 1/-0 为 -infinity
+        return x !== 0 || y !== 0 || 1/x === 1/y
+    } else {
+        return x !== x && y !== y
+    }
+}
+```
+
+#### Symbol.toPrimitive
+对象的Symbol.toPrimitive属性。指向一个方法。该对象被转化为原始类型的值时，会调用这个办法，返回该对象对应的原始类型值。
+Symbol.toPrimitive被调用时,会接受一个字符串参数，表示当前运算的模式，一个有三种模式:
++ Number:该场合需要转成数值
++ String:该场合需要转成字符串
++ Default:该场合可以转成数值，也可以转成字符串。
+
+在Object执行类型转换时若存在Symbol.toPrimitive则优先级最高, 其次是valueOf, 最后是toString
+
+### 四种扁平化方法
+#### 直接遍历
+```
+function flatten(arr, result) {
+arr.forEach(item => {
+    if (item instanceof Array) {
+        flatten(item, result)
+    } else {
+        result.push(item)
+    }
+})
+return result
+}
+```
+#### 累加器
+```
+function flatten(arr) {
+    return arr.reduce((accumulator, cur) => {
+        return accumulator.concat(Array.isArray(cur) ? flatten(cur) : cur)
+    })
+}
+```
+#### 使用扩展运算符
+```
+function flatten(arr) {
+    whilt(arr.some(item => item instanceof Array)) {
+        arr = [].concat(...item)
+    }
+    return arr
+}
+```
+#### 使用ES6中flat方法
+```
+function flatten(arr) {
+    return arr.flat(Infinity)
+}
+```
+### 手写一系列数组方法
+#### 手写map方法
+```
+Array.prototype.map = function(callbackFn, thisArg) {
+    if (this === null || this === undefined) {
+        throw new TypeError("cannot read property 'map' of null or undefined");
+    }
+    if (Object.prototype.toString.call(callbackFn) !== '[object Function]') {
+        throw new TypeError(callbackFn + "is not a function");
+    }
+
+    let O = Object(this);
+    let T = thisArg || this;
+    
+    let len = O.length >>> 0; // 防止出现非整数, 如果是undefined将变成0
+    let A = new Array(len); // 创建一个新的原数组长的空数组
+
+    for (let k = 0; k < len; k++) {
+        if (k in O) {
+            let kValue = O[k];
+            let mappedValue = callbackFn.call(T, kValue, k, O);
+            A[k] = mappedValue;
+        }
+    }
+    return A;
+}
+```
+#### 手写reduce累加器
+```
+Array.prototype.reduce = function(callbackFn, initValue) {
+    if (this === null || this === undefined) {
+        throw new TypeError("cannot read property 'map' of null or undefined");
+    }
+    if (Object.prototype.toString.call(callbackFn) !== '[object Function]') {
+        throw new TypeError(callbackFn + 'is not a function!');
+    }
+
+    let O = Objecat(this);
+    let len = O.length >>> 0;
+    let k = 0;
+    let accumulator = initValue;
+    if (accumulator === undefined) {
+        for (; k < len; k++) {
+            if (k in O) {
+                accumulator = O[k]; // * 如果没有默认的初试累加值默认采用第一个作为累加值, 同时退出循环并且完成第一次遍历
+                k++;
+                break;
+            }
+        }
+    }
+    if (k === len && accumulator === undefined) {
+        throw new TypeError('each element of the array is empty');
+    }
+    for (; k < len; k++) {
+        if (k in O) {
+            accumulator = callbackFn.call(undefined, accumulator, O[k], k, O); // * 每一次遍历触发传入的回调函数, 参数依次是 累加值 当前值 序列号和当前数组
+        }
+    }
+    return accumulator;
+}
+```
+#### 手写数组push方法
+```
+Array.prototype.push = function(...items) {
+  let O = Object(this);
+  let len = O.length >>> 0;
+  let argCount = items.length >>> 0;
+  // * 2 ** 53 - 1 为JS能表示的最大整数
+  if (len + argCount > 2 ** 53 - 1) {
+    throw new TypeError("The number of array is over the max value retricted!");
+  }
+  for (let i = 0; i < argCount; i++) {
+    O[len + i] = items[i];
+  }
+  let newLength = len + argCount;
+  O.length = newLength;
+  return newLength;
+}
+```
+#### 手写数组pop方法
+```
+Array.prototype.pop = function() {
+  let O = Object(this);
+  let len = this.length >>> 0;
+  if (len === 0) {
+    O.length = 0;
+    return undefined;
+  } else {
+    len--;
+    let value = O[len]
+    delete O[len];
+    O.length = len;
+    return value;
+  }
+}
+```
+#### 手写数组filter方法
+```
+Array.prototype.filter = function(callbackFn, thisArg) {
+  if (this === null || this === undefined) {
+    throw new TypeError("cannot read property 'filter' of null or undefined!");
+  }
+  if (Object.prototype.toString.call(callbackFn) !== '[object Function]') {
+    throw new TypeError(callbackFn + "is not a function");
+  }
+  let O = Object(this);
+  let len = O.length >>> 0;
+  // let T = thisArg || this
+  let resLen = 0
+  let res = []
+  for (let i = 0; i < len; i++) {
+    if (i in O) {
+      if (callbackFn.call(thisArg, O[i], i, O)) {
+        res[resLen++] = O[i]
+      }
+    }
+  }
+  return res
+}
+```
+
+#### 手写数组splice方法
++ 主要要解决的问题就是删除元素大于增加元素, 需要向前移动剩余元素,同时减小数组长度, 删除元素小于增加元素, 需要将新增元素位置后面的元素向后移动为新增元素空出位置
++ 需要对开始下标小于0的参数进行处理, splice方法当他的开始下标小于0的时候会用 长度 - 开始下标的绝对值 判断是否小于0, 如果小于0则使用0, 如果不是则直接使用该结果, 如果下标大于数组长度则直接使用数组长度
++ 对删除数目进行处理, 如果删除数目过小则直接为0, 过大则从开始下标直接删完, 不传也是删完
++ 对Object.freeze和Object.seal后的数组进行判断, 如果是冻结数组则判断是否有删除和新增值, 只要存在则报错, 如果是封闭对象, 则判断删除数目和新增数目是否一致, 一致则可以, 不一致则报错
+```
+const sliceDeleteElements = function(array, startIndex, deleteCount, deleteArr) {
+  for (let i = 0; i < deleteCount; i++) {
+    if (startIndex + i in array) {
+      deleteArr[i] = array[startIndex + i]
+    }
+  }
+}
+const movePostElements = function(array, startIndex, len, deleteCount, addElements) {
+  if (deleteCount > addElements.length) {
+    // * 删除元素等于插入元素, 不需要移动
+    if (deleteCount === addElements.length) {
+      return
+    } else if (deleteCount > addElements.length) {
+      // * 删除元素大于插入元素
+      for (let i = startIndex + deleteCount; i < len; i++) {
+        let fromIndex = i;
+        let toIndex = i - (deleteCount - addElements.length);
+        if (fromIndex in array) {
+          array[toIndex] = array[fromIndex]
+        } else {
+          delete array[toIndex]
+        }
+      }
+      // * 将目标数组长度后面的都删除
+      for (let i = len - 1; i >= len + addElements.length - deleteCount; i--) {
+        if (i in array) {
+          delete array[i]
+        }
+      }
+    } else if (deleteCount < addElements.length) {
+      // * 删除元素小于插入元素
+      // * 从后往前遍历, 给中间留出新增数据的位置即可
+      for (let i = len - 1; i >= startIndex + deleteCount; i--) {
+        let fromIndex = i;
+        let toIndex = i + (addElements.length - deleteCount);
+        if (fromIndex in array) {
+          array[toIndex] = array[fromIndex]
+        } else {
+          delete array[toIndex]
+        }
+      }
+    }
+    
+  }
+}
+// * 处理负数startIndex
+const computedStartIndex = function(startIndex, len) {
+  if (startIndex < 0) {
+    // * splice为负索引时, 会使用长度减去索引的绝对值来作为开始索引，如果该值还是小于0, 那么就会直接使用0
+    return startIndex + len > 0 ? startIndex + len : 0
+  }
+  return startIndex > len ? len : startIndex
+}
+// * 处理删除数目deleteCount
+const computedDeleteCount = function(startIndex, deleteCount, len, arguementsLen) {
+  if (argumentsLen === 1) {
+    // * 删除数没有传, 默然将整个数组从开始下标直接删除
+    return len - startIndex
+  }
+  // * 删除数过小
+  if (deleteCount < 0) {
+    return 0
+  }
+  // * 删除数过大
+  if (deleteCount > len - startIndex) {
+    return len - startIndex
+  }
+  return deleteCount
+}
+Array.prototype.splice = function(startIndex, deleteCount, ...addElements) {
+  // * 处理密闭对象和冻结对象
+  if (Object.isSealed(array) && deleteCount !== addElements.length) {
+    throw new TypeError("the object is a sealed object!")
+  } else if (Object.isFrozen(array) && (deleteCount > 0 || addElements.length > 0)) {
+    throw new TypeError("the object is a frozen object")
+  }
+  
+  // * 获取参数长度
+  let arguementsLen = arguments.length;
+  // * 获取当前数组
+  let array = Object(this);
+  // * 获取当前数组长度
+  let len = array.length >>> 0;
+  // * 定义需要删除的数组长度的空数组
+  let deleteArr = new Array(deleteCount);
+  
+  let startIndex = computedStartIndex(startIndex, len);
+  let deleteCount = computedDeleteCount(startIndex, deleteCount, len, arguementsLen);
+  // * 拷贝删除的元素
+  sliceDeleteElements(array, startIndex, deleteCount, deleteArr);
+  // * 移动删除元素后面的元素
+  movePostElements(array, startIndex, len, deleteCount, addElements);
+  // * 插入新元素
+  for (let i = 0; i < addElements.length; i++) {
+    array[startIndex + i] = addElements[i];
+  }
+  array.length = len - deleteCount + addElements.length;
+  return deleteArr;
+}
+```

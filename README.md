@@ -739,6 +739,28 @@ function bind(context, ...args) {
     return fbound;
 }
 ```
+
+### 浅拷贝(仅拷贝第一层的值, 从第二层开始都是拷贝的指向堆地址的指针)的手段有哪些
++ Array.prototype.slice
++ Object.assign
++ 解构赋值
++ 扩展运算符
++ Array.prototype.concat
+
+### 谈谈对this的理解
++ call/apply/bind可以显示绑定this
++ 隐式绑定
+    - 全局上下文: 默认指向window, 严格模式下指向undefined
+    - 直接调用函数: 
+        + 对于普通函数是指向调用它的作用域, 比如全局调用指向全局, 对象调用指向该对象
+        + 箭头函数内部this永远指向箭头函数定义时的父级作用域
+    - 对象.方法的调用方式
+        + 对于普通函数指向这个对象
+        + 对于箭头函数指向定义时的父级作用域
+    - DOM事件绑定
+        + onclick和addEventListener中this默认指向绑定事件的元素
+    - new 构造函数绑定: 指向实例对象
+    - 箭头函数: 指向定义时的父级作用域并且永远不变
 ## 题目
 + 如何准确判断一个变量是不是数组?
 + 手写一个简易的Jquer，考虑插件和扩展性

@@ -587,6 +587,7 @@ Symbol | 数字 | 抛错
 + 如果需要转字符串类型就调用x.toString(), 转换为基础类型就返回。
 + 如果不是转字符串, 会先调用valueOf()方法, 如果没有转换为原始类型, 就会使用toString()如果还是没有转为原始类型, 抛错
 + 当然, 也可以使用`[Symbol.ToPrimitive]() {}`重写转换方法, 此方法优先级最高
+
 ```
 const a = {
     valueOf() {
@@ -620,6 +621,7 @@ true + true // 2
 
 #### 减乘除运算符
 只要一方是数字, 那么另一方就被转换为数字
+
 ```
 4 * '3' // 12
 4 * [] // 0
@@ -650,6 +652,7 @@ true + true // 2
     - 值类型赋值的时候，直接在栈中开辟内存，key为名，value就是他的值
     - 引用类型在栈中开辟内存，同时在堆中存储地址，栈中key为名，value存储的为内存地址名，该内存地址名对应堆中key，堆中value就是引用类型的值，因此引用类型直接赋值，就会将该引用类型在堆中的地址，赋值给新的引用类型变量
 + 手写深拷贝
+
 ```
 function isObject = (target) => (typeof target === 'object' || typeof target === 'function') && target !== null;
 function deepClone(obj = {}, map = new weakMap()) {
@@ -728,6 +731,7 @@ console.log(g.next()) // { value: undefined, done: true }
 要想知道`Generator`和异步的关系, 首先要搞清楚一个概念————thunk函数(偏函数), 虽然这只是实现两者关系的方式之一。(另一种方式是Promise)
 
 举个例子, 比如现在我们要判断的数据类型, 可以写如下判断逻辑:
+
 ```
 let isString = (obj) => {
     return Object.prototype.toString.call(obj) === '[object String]';
@@ -836,6 +840,7 @@ a prototype may have a non-null implicit reference to its prototype, and so on; 
 实际上就是JS通过prototype的__proto__属性指向父类对象的prototype, 直到指向Object为止
 
 ### 最简单的继承(寄生组合继承)
+
 ```
 function Father() {
 

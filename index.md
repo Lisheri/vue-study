@@ -588,6 +588,7 @@ Symbol | 数字 | 抛错
 + 如果不是转字符串, 会先调用valueOf()方法, 如果没有转换为原始类型, 就会使用toString()如果还是没有转为原始类型, 抛错
 + 当然, 也可以使用`[Symbol.ToPrimitive]() {}`重写转换方法, 此方法优先级最高
 
+
 ```
 const a = {
     valueOf() {

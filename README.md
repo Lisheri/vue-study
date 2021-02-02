@@ -876,6 +876,31 @@ wang.getMoney() // 9000
 ```
 
 #### 类型判断 instanceof
++ 手写 instanceof
+```
+funciton instanceof(left, right) {
+    let prototype = right.prototype;
+    left = left.__proto__
+    while(true) {
+        if (left === null) {
+            return false;
+        }
+        if (prototype === left) {
+            return true;
+        }
+        left = left.__proto__;
+    }
+}
+```
+
+##### instanceof也可以用于判断原始类型
+```
+class PrimitiveNumber{
+    static [Symbol.hasInsatance](x) {
+        return typeof x === 'number'
+    }
+}
+```
 
 ##### 如上三个类的一些判断
 + xialuo instanceof Student

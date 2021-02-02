@@ -216,6 +216,7 @@ const objq2 = Object.assign({}, objq1)
 
 ### 深拷贝
 不仅在栈中开辟一个新的地址, 内部所有层级的指针都指向堆中开辟的新地址
+
 ```
 // 深拷贝
 /**
@@ -498,13 +499,13 @@ TIME_WAIT状态也被称为2MSL等待状态。 MSL是值报文段最大生存时
 ## 变量类型和计算
 ## 值类型和引用类型
 
-#### 题目
+### 题目
 + typeof能判断哪些类型？
 + 何时使用 === 何时使用 ==
 + 值类型和引用类型的区别
 + 手写深拷贝
 
-#### 值类型
+### 值类型(原始类型)
 
 ```
 let a = 100;
@@ -513,8 +514,9 @@ a = 200;
 console.info(b); // 100
 // 这两个并不会相互干涉
 ```
-
-#### 引用类型
+#### js原始数据类型
+undefined、boolean、number、string、symbol、null、bigint
+### 引用类型
 
 ```
 let a = {
@@ -532,18 +534,12 @@ console.info(a.age) // 21
 
 而在引用类型中，定义a的时候，先在栈中开一个a的区域，键名为a，键值指向a的内存地址a，同时加入堆的概念。栈是一个从上往下的结构，堆是一个从下往上的结构，在内存足够的情况下，栈和堆并不会重合。而在栈中开辟a的同时，就会在堆中存放一个键名为内存地址a，键值为{age: 20}的结构。由于摸不清一个对象中究竟有多少数据，考虑到一个性能问题，因此js的引用类型都会采用这样的存储方式。而定义b，并且将a的值赋给b的时候，就直接将a在堆中的内存地址a赋值给了b，也就是说，在栈中，a和b指向了同一个堆的内存地址，因此，在修改b中age的时候，a的age，也发生同样的改变，因为他们从根本上说就是一个东西。这就是所谓的浅拷贝。
 
-#### 常见值类型
-undefined、 boolean、 number、 string、 symbol、 bigint
 
-#### 常见引用类型
-object、array、null、function
-其中null是特殊引用类型，指向空地址
+#### 常见引用类型(对象类型)
+object、array、function
 function也是特殊引用类型，但不用于存储数据，所以没有“拷贝、复制函数”这一说
 
-#### js基本数据类型
-undefined、boolean、number、string、symbol、null、bigint
-
-#### typeof运算符
+### typeof运算符
 + 识别所有值类型
     - typeof "123" // string
     - typeof 10 // number
@@ -555,57 +551,92 @@ undefined、boolean、number、string、symbol、null、bigint
     - typeof function() {} // function
     - typeof console.info() // function
 + 判断是否是引用类型(不可再细分)
-    - typeof null // object
+    - typeof null // object(这是一个美丽的错位, 原因是因为js对于object的判断是判断地址前三位是不是000, 而null全是0, 因此导致错误判断为了object, 实际上他是原始类型, 存储在栈中)
     - typeof [] // object
     - typeof {} // object
 
-#### 变量计算
-+ 字符串拼接
-+ == 运算符
-+ if语句，三元表达式等逻辑运算
+### 类型转换
+首先在js中, 类型转换只有三种情况, 分别是:
++ 转换为布尔值
++ 转换为数字
++ 转换为字符串
+
+| 原始值 | 转换目标 | 结果
+-------- | -------- | ------
+number | 布尔值 | 除了0,-0, NaN 都是true
+string | 布尔值 | 除了空字符串都是true
+undefind、null | 布尔值 | false
+引用类型 | 布尔值 | true
+number | 字符串 | 5 => '5'
+Boolean、函数、Symbol | 字符串 | 一般是什么样子就是两边加引号, 比如true => 'true'
+数组 | 字符串 | [1，2，3] => "1, 2, 3"
+对象 | 字符串 | '[object Object]'
+string | 数字 | '1' => 1, 'a' => NaN
+数组 | 数字 | 空数组为0, 如果是一个元素并且是数字或者是字符串类的数字那么就是转换为这个元素的数字, 其他元素为NaN
+null | 数字 | 0
+undefined | 数字 | NaN
+除数组之外的引用类型 | 数字 | NaN
+Symbol | 数字 | 抛错
+
+#### 转换为Boolean
+从上面那个表可以看出, 除了undefined、 null、false、 NaN、''、0、-0, 其他所有值都是true, 包括引用类型
+
+#### 对象转原始类型
+对象在转换为原始类型时会调用内置的 `[[ToPrimitive]]` 函数, 对于该函数来说, 算法逻辑如下:
++ 如果已经是原始类型, 那就不需要转换了
++ 如果需要转字符串类型就调用x.toString(), 转换为基础类型就返回。
++ 如果不是转字符串, 会先调用valueOf()方法, 如果没有转换为原始类型, 就会使用toString()如果还是没有转为原始类型, 抛错
++ 当然, 也可以使用`[Symbol.ToPrimitive]() {}`重写转换方法, 此方法优先级最高
+```
+const a = {
+    valueOf() {
+        return 10
+    },
+    toString() {
+        return '10'
+    },
+    [Symbol.ToPrimitive]() {
+        return 2
+    }
+}
+
+console.info(a + 1); // 3
+```
+#### 加法运算符
+他有两个特点:
++ 运算中其中一方为字符串, 那么就会把另一方也转换为字符串
++ 如果一方不是字符串或数字, 那么就会将它转换为数字或字符串
 
 ```
-// 字符串拼接
-const a = 100 + 10; // 110
-const b = 100 + "10"; // "10010"
-const c = true + "10"; // "true10"
-
-// ==运算符
-100 == "100" // true
-0 == "" // true
-0 == false // true
-false == "" // true
-null == undefined // true
-
-// 除了判断是否为null或者undefined时，可以使用一个==之外，其他一律用 ===
-// 其余==和===的规则，见望远镜书
-
-// if语句和逻辑运算
-// if判断实际上是判断的truly变量和falsely变量
-
-//truly变量,两步true运算为true
-!!a === true 
-//falsely变量, 两步false运算为false
-!!a === false
-
-// 以下是falsely变量。除此之外都是truly变量
-!!0 === false
-!!NaN === false
-!! '' === false
-!! null === false
-!! undefined === false
-!! false === false
-
-// 逻辑运算
-
-// 逻辑与如果第一个值是truely变量则往后判断返回第二个值
-console.info(10 && 0) // 0
-// 逻辑或如果第一个值是一个truely变量则返回，如果是falsely变量则往后判断
-console.info('' || 'abc') // 'abc'
-console.info(!window.abc) // true
+1 + '1' // '11'
+true + true // 2
+4 + [1,2,3] // '41,2,3'
+1++1
 ```
 
-#### 题目解答
+还有一种表达式: `'a' + + 'b' // aNaN`
+
+主要是由于 + 'b'是NaN, 所以结果是aNaN, 因此有些地方可以利用 `+ '1'`快速获取number
+
+#### 减乘除运算符
+只要一方是数字, 那么另一方就被转换为数字
+```
+4 * '3' // 12
+4 * [] // 0
+4 * [1,2,3] // NaN
+```
+
+### == 和 ===
+
+区别： 对于双等, 如果类型不一致, 会先转换类型在进行比较, 如果是三等, 那必须要求类型和值都相等(实际上三等比较不了 +0和-0, 也比较不了NaN)
+#### ==的判断流程
++ 1. 首先会判断两者类型是否相同, 如果相同就直接比较大小。
++ 2. 类型不相同的话, 那么就会进行类型转换
++ 3. 会判断是否在比对 `null` 和 `undefined` , 如果是直接返回 `true`
++ 4. 判断两者类型是否为 `string` 和 `number`, 是的话就将字符串转换为`number`
++ 5. 判断其中一方是否为 `boolean`, 是的话就把 `boolean` 转换为 `number` 在进行判断
++ 6. 判断其中一方是否为 `object` 并且另一方是`string`、`number`、`symbol`, 是的话就会把 `object` 转换为原始类型在进行判断
+### 题目解答
 + typeof能够判断哪些类型
     - 识别所有值类型 
     undefined number string symbol bigint boolean
@@ -614,27 +645,184 @@ console.info(!window.abc) // true
     - 判断是否是引用类型(不可在细分)
     object
 + 何时使用=== 何时使用==
-    - 除了判断是null或者undefined之外，其他都用===
+    - 除了判断是null或者undefined之外，其他都建议使用===(Object.is修复了三等对NaN和NaN, +0和-0的错误判断)
 + 值类型和引用类型的区别
     - 值类型赋值的时候，直接在栈中开辟内存，key为名，value就是他的值
     - 引用类型在栈中开辟内存，同时在堆中存储地址，栈中key为名，value存储的为内存地址名，该内存地址名对应堆中key，堆中value就是引用类型的值，因此引用类型直接赋值，就会将该引用类型在堆中的地址，赋值给新的引用类型变量
 + 手写深拷贝
 ```
-function deepClone(obj = {}) {
-    let result = obj instanceof Array ? [] : {}
-    if (typeof obj === "object") {
-        Object.keys(obj).forEach(key => {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                result[key] = deepClone(obj[key])
+function isObject = (target) => (typeof target === 'object' || typeof target === 'function') && target !== null;
+function deepClone(obj = {}, map = new weakMap()) {
+    if (map.get(obj)) {
+        return obj
+    }
+    let res = obj instanceof Array ? [] : {};
+    if (isObject(obj)) {
+        map.set(obj, true)
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                res[key] = isObject(obj[key]) ? deepClone(obj[key]) : obj[key]
             }
-        })
+        }
+        return res
     } else {
         return obj
     }
-    return result
 }
 ```
 
+## JS异步编程
+### 并发和并行的区别
++ `并发`: `并发`是宏观概念, 分别有A和B两个任务, 在一段时间内通过任务间的切换完成了这两个任务, 这种情况称为并发
++ `并行`: `并行`是微观概念，假设CPU中有两个核心, 那么可以同时完成A和B两个任务。同时完成多个任务的情况就是并行。
+
+### callbacks(回调函数)
+
+#### 回调地狱的根本问题:
++ 1. 嵌套函数存在耦合性, 一旦有所改动, 就会牵一发而动全身
++ 2. 嵌套函数太多难以处理错误, 每一层都要处理
++ 3. 不能try catch, 不能直接return
+
+### Generator
+
+#### Generator是什么？
+Generator(生成器)是一个带有`*`号的函数, 可以通过`yield`关键字`暂时执行`和`恢复执行`
+
+如下所示:
+
+```
+function* gen() {
+  console.log("enter");
+  let a = yield 1;
+  let b = yield (function () {return 2})();
+  return 3;
+}
+var g = gen() // 阻塞住，不会执行任何语句// enter
+console.log(typeof g)  // object  看到了吗？不是"function"
+
+console.log(g.next())  // { value: 1, done: false }
+console.log(g.next())  // { value: 2, done: false }
+console.log(g.next())  // { value: 3, done: true }
+console.log(g.next()) // { value: undefined, done: true }
+```
+主要有几个关键的地方:
++ 调用gen函数后, 遇到yield程序会阻塞, 不会执行任何语句
++ 调用gen.next()后, 程序会继续执行, 直到遇到下一个yield, 并且next()可以传递参数, 代表的是上一次yield返回的值
++ next方法返回一个对象, 有两个属性`value`和`done`, value为`当前yield后面的结果`, done表示`是否执行完`, 遇到return, done就自动由false变为true
+
+#### 是什么让生成器函数暂停和执行。
++ 生成器执行机制————`协程`
++ 协程是什么?
+    - 协程是一种比线程更轻量的存在, 协程处于线程环境中, `一个线程可以存在多个协程`, 不像进程和线程, 协程不收操作系统控制, 是由具体的程序代码来控制的。
++ 多个协程可以一起执行吗？
+    - 不行, 一个线程一次性只能执行一个协程, 比如当前协程A在执行, 还有另一个协程B, 如果要执行协程B, 就必须在A协程中将`JS线程的控制权转移给B协程`, 那么现在B执行, A就处于暂停状态
++ 协程性能较高
+    - 因为他不受操作系统控制, 完全由用户自定义切换, 没有进程/线程的`上下文切换`开销
+
+#### 如何让Generator的异步代码按顺序执行?
+其实这里有两个问题:
+1. `Generator`如何跟`异步`产生关系?
+2. 怎么把`Generator`按顺序执行完毕?
+
+##### thunk函数
+要想知道`Generator`和异步的关系, 首先要搞清楚一个概念————thunk函数(偏函数), 虽然这只是实现两者关系的方式之一。(另一种方式是Promise)
+
+举个例子, 比如现在我们要判断的数据类型, 可以写如下判断逻辑:
+```
+let isString = (obj) => {
+    return Object.prototype.toString.call(obj) === '[object String]';
+}
+
+let isFunction = (obj) => {
+    return Object.prototype.toString.call(obj) === '[object Function]';
+}
+
+let isArray = (obj) => {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
+let isSet = (obj) => {
+    return Object.prototype.toString.call(obj) === '[object Set]';
+}
+```
+
+但是这样出现了大量重复的函数, 因此可以做一次封装
+
+```
+let isType = (obj, type) => {
+    return Object.prototype.toString.call(obj) === `[object ${type}]`;
+}
+```
+
+这个isType函数被称为thunk函数。 核心逻辑是接收一定的参数产生一个定制化的函数, 然后使用定制化的函数去完成功能。
+
+thunk函数的实现会比单个的判断函数复杂一点点，但就是这一点点的复杂大大方便了后续的操作
+
+##### 异步执行的方式:
+1. 利用thunk函数
+2. 利用Promise
+3. co库和Generator结合
+
+### Promise
+Promise 有三种形态:
++ 等待(pending)
++ 完成(resolved)
++ 拒绝(rejected)
+
+Promise一旦从pending转换为了其他形态, 就不会再做改变了
+
+在构造Promise得我时候, 构造函数内部的代码是立即执行的
+
+Promise实现了链式调用, 每一次then返回的都是一个全新的Promise, 如果在then中return一个值, 就会被封装成一个Promise.resolve()
+
+#### Promise 解决回调地狱
++ 返回值穿透
++ 错误冒泡(在最后一次去catch)
++ 回调函数延迟绑定
+
+#### Promise缺点
++ 无法取消
++ 错误需要回调函数来捕获
+
+### async/await
+async将函数的返回值使用Promise.resolve()包裹了一下, 和then中处理返回值是一样的, 并且await只能配合async使用
+
+async/await是终极异步解决方案, 凡是await都会当做同步处理
+
+当然, 如果没有依赖性建议使用Promise.all, 否则的话, 性能会下降, 毕竟变成了同步执行。
+
+### setTimeout, setInterval, requestAnimationFrame
+前面两个实际上延迟时间是不准确的, 略有一点差距, 但是最后一个一定是16.6ms(一帧)执行一次(不掉帧的情况下)
+
+最主要是JS是单线程, 前方代码执行, 也是要花时间的
+
+可以使用requestAnimationFrame来封装 setInterval
+
+```
+function setInterval(callback, interval) {
+  let timer
+  const now = Date.now
+  let startTime = now()
+  let endTime = startTime
+  const loop = () => {
+    timer = window.requestAnimationFrame(loop)
+    endTime = now()
+    if (endTime - startTime >= interval) {
+      startTime = endTime = now()
+      callback(timer)
+    }
+  }
+  timer = window.requestAnimationFrame(loop)
+  return timer
+}
+
+let a = 0
+setInterval(timer => {
+  console.log(1)
+  a++
+  if (a === 3) cancelAnimationFrame(timer)
+}, 1000)
+```
 ## 原型和原型链
 在ES2019中，用了一句短短的话，介绍了一下原型链--prototype chain
 a prototype may have a non-null implicit reference to its prototype, and so on; this is called the prototype chain

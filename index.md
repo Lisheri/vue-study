@@ -187,6 +187,7 @@ XSS 全称是 `Cross Site Scripting` 也就是 `跨站脚本攻击`, 为了和CS
 ### 浅拷贝
 + 所谓拷贝就是直接使用等号去将一个引用类型给一个新的变量, 由于js存储机制的原因, 这个赋值操作实际上是在栈中开辟一个新的地址, 赋值的实际上是原地址的指针, 这两个地址的指针, 都指向了堆中同一个位置, 因此改变其中一个, 另一个都改变了
 + 而浅拷贝是指仅仅只有引用类型下第一层的指针, 指向了堆中的新地址, 如果第一层中还是存在一个对象, 那么该对象内部键的指针依然指向原对象在堆中存储的地址
+
 ```
 // 拷贝
 const obj1 = {
@@ -828,6 +829,10 @@ setInterval(timer => {
   if (a === 3) cancelAnimationFrame(timer)
 }, 1000)
 ```
+
+## 手写Promise
+
+
 ## 原型和原型链
 在ES2019中，用了一句短短的话，介绍了一下原型链--prototype chain
 a prototype may have a non-null implicit reference to its prototype, and so on; this is called the prototype chain

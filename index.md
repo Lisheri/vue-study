@@ -834,6 +834,12 @@ setInterval(timer => {
 
 ### 简易版
 
+对于`resolve`和`reject`的封装:
++ 首先两个函数都要先判断状态是不是pending状态, 只有pending状态才能改变状态
++ 当前状态改变之后, 就要将传入的值复制给当前的value
++ 然后遍历回调数组立即执行 
+
+
 ```
 const PENDING = 'pending';
 const RESOLVE = 'resolve'
@@ -851,10 +857,29 @@ function MyPromise(fn) {
         if (that.state === PENDING) {
             that.value = value;
             that.state = RESOLVE;
-            that.resolvedCallbacks.map(cb => cb(this.value))
+            that.resolvedCallbacks.map(cb => cb(that.value))
         }
     }
+    
+    function reject(value) {
+        if (that.state === PENDING) {
+            that.value = value;
+            that.state = REJECTED;
+            that.rejectCallbacks.map(cb => cb(that.value))
+        }
+    }
+
+    // * 执行函数
+    try {
+        //
+        fn(resolve, reject);
+    } catch (e) {
+        reject(e)
+    }
 }
+
+// * 接下来是then函数
+
 ```
 
 

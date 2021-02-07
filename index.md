@@ -832,6 +832,31 @@ setInterval(timer => {
 
 ## 手写Promise
 
+### 简易版
+
+```
+const PENDING = 'pending';
+const RESOLVE = 'resolve'
+const REJECTED = 'rejected'
+
+function MyPromise(fn) {
+    const that = this;
+    that.state = PENDING;
+    that.value = null; // * 用于保存resolve或者reject传入的值
+    that.resolveCallbacks = []; // * 保存then的回调
+    that.rejectCallbacks = []; // * 保存catch的回调
+    
+    // * 完善resolve和reject
+    funciton resolve(value) {
+        if (that.state === PENDING) {
+            that.value = value;
+            that.state = RESOLVE;
+            that.resolvedCallbacks.map(cb => cb(this.value))
+        }
+    }
+}
+```
+
 
 ## 原型和原型链
 在ES2019中，用了一句短短的话，介绍了一下原型链--prototype chain

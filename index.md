@@ -842,7 +842,7 @@ setInterval(timer => {
 
 ```
 const PENDING = 'pending';
-const RESOLVE = 'resolve'
+const RESOLVED = 'resolved'
 const REJECTED = 'rejected'
 
 function MyPromise(fn) {
@@ -856,7 +856,7 @@ function MyPromise(fn) {
     funciton resolve(value) {
         if (that.state === PENDING) {
             that.value = value;
-            that.state = RESOLVE;
+            that.state = RESOLVED;
             that.resolvedCallbacks.map(cb => cb(that.value))
         }
     }
@@ -879,9 +879,34 @@ function MyPromise(fn) {
 }
 
 // * 接下来是then函数
-
+MyPromise.prototype.then = function(onFulfilled, onRejected) {
+    const that = this;
+    // * 首先要判断是不是函数类型, 如果不是函数类型, 则创建一个函数赋值给对应的参数, 同时也实现了透传
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : v => v;
+    onRejected = typeof onRejected === 'function' ? onRejected : r => throw{ r };
+    if (that.state === PENDING) {
+        // * Promise中then的回调延迟挂载
+        that.resolveCallbacks.push(onFulfilled);
+        that.rejectCallbacks.push(onRejected);
+    }
+    if (that.state === RESOLVED) {
+        // * resolved状态直接执行
+        onFulfilled(that.value)
+    }
+    if (that.state === REJECTED) {
+        // * rejected状态直接执行
+        onRejected(that.value)
+    }
+}
 ```
 
+### 实现一个符合 Promise/A+ 规范的 Promise(稍微正式版)
+
+```
+const PENDING = 'pending';
+const RESOLVED = 'resolved';
+const REJECTED = 'rejected';
+```
 
 ## 原型和原型链
 在ES2019中，用了一句短短的话，介绍了一下原型链--prototype chain

@@ -906,6 +906,155 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
 const PENDING = 'pending';
 const RESOLVED = 'resolved';
 const REJECTED = 'rejected';
+
+function MyPromise(fn) {
+    const vm = this; // * 使用that替代全局this指向
+    vm.state = PENDING;
+    vm.value = null; // * 用于保存
+    vm.resolvedCallbacks = []; // * 用于保存then中的回调
+    vm.rejectedCallbacks = []; // * 用于保存catch中的回调
+
+    // * 完善一个符合Promise A+ 的 resolve 和 reject
+    function resolve(value) {
+        // * 首先要判断传入的 value 是不是一个 Promise 类型
+        if (value instanceof MyPromise) {
+            return value.then(resolve, reject);
+        }
+        // * 由于resolve是一个异步操作, 因此将他们用setTimeout包裹起来, 保障执行顺序
+        setTimeout(() => {
+            if (vm.state === PENDING) {
+                vm.value = value;
+                vm.state = RESOLVED;
+                vm.resolvedCallbacks.map(cb => cb(vm.value));
+            }
+        }, 0)
+    }
+
+    function reject(value) {
+        setTimeout(() => {
+            if (vm.state === PENDING) {
+                vm.value = value;
+                vm.state = REJECTED;
+                vm.rejectedCallbacks.map(cb => cb(vm.value))
+            }
+        }, 0)
+    }
+}
+
+MyPromise.prototype.then = function(onFulfilled, onRejected) {
+    consst vm = this;
+    // * 首先要判断是不是函数类型, 如果不是函数类型, 则创建一个函数赋值给对应的参数, 同时也实现了透传
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : v => v;
+    onRejected = typeof onRejected === 'function' ? onRejected : r => throw{ r };
+    let promise2;
+
+    // * 接下来需要改造then函数判断逻辑, 首先要新增一个变量 promise2
+    // * 因为每一个then函数需要返回一个新的 Promise 对象, 该变量用于保存新的返回对象, 然后我们接下来是改造判断等待状态的逻辑
+    // * 首先返回一个新的 Promise对象， 并在Promise中传入一个函数
+    // * 基本逻辑和之前的一样， 往回调函数的数组中push函数
+    // * 同样， 在执行过程中可能会出错， 因此使用try catch
+    // * 规范规定， 执行onFulfilled 或者 onRejected 函数时会返回一个 x， 并且执行 Promise 解决过程， 这是为了不同的 Promise 都可以兼容使用， 比如 JQ 的 Promise 能兼容 ES6 的 Promise
+     if (that.state === PENDING) {
+         return ( promise2 = new MyPromise((resolve, reject) => {
+             that.resolvedCallbacks.push(() => {
+                 try {
+                     const x = onFulfilled(that.value);
+                     resolutionProcedure(promise2, x, resolve, reject)
+                 } catch (r) {
+                     reject(r)
+                 }
+             })
+
+             that.rejectedCallbacks.push(() => {
+                 try {
+                     const x = onRejected(that.value);
+                     resolutionProcedure(promise2, x, resolve, reject);
+                 } catch (r) {
+                     reject(r)
+                 }
+             })
+         }))
+     }
+
+     if (that.state === RESOLVED) {
+         return (promise2 = new MyPromise((resolve, reject) => {
+             setTimeout(() => {
+                 try {
+                     const x = onFulfilled(that.value);
+                     resolutionProcedure(promise2, x, resolve, reject);
+                 } catch (r) {
+                     reject(r)
+                 }
+             }, 0)
+         }))
+     }
+
+     if (that.state === REJECTED) {
+         return (promise2 = new MyPromise((resolve, reject) => {
+             setTimeout(() => {
+                 try {
+                     const x = onRejected(that.value);
+                     resolutionProcedure(promise2, x, resolve, reject);
+                 } catch (err) {
+                     reject(err)
+                 }
+             })
+         }))
+     }
+}
+
+// * 最后，也是最难的一部分，也就是实现兼容多种 Promise 的 resolutionProcedure 函数
+// * 首先 Promise A+ 规范规定了 x 不能和 Promise2相等, 这样会引发循环引用的问题
+function resolutionProcedure(promise2, x, resolve, reject) {
+    if (promise2 === x) {
+        return reject(new TypeError('有毛病'))
+    }
+
+    // * 然后需要判断 x 的类型
+    // * 规范规定如果 x 是一个 Promise，那么需要判断一以下两种情况:
+    // * 1. 如果 x 处于等待状态, Promise需保持为等待状态直至 x 被执行或拒绝
+    // * 2. 如果 x 处于其他状态, 则用相同的值处理 Promise
+    if (x instanceof MyPromise) {
+        x.then(function(value) {
+            resolutionProcedure(promise2, value, resolve, reject)
+        }, reject)
+    }
+
+    // * 接着实现剩下的部分
+    // * 首先创建一个变量called, 用于判断是否已经调用过函数
+    // * 然后判断 x 是否是一个对象或者函数， 如果都不是， 就将 x 传入resolve中
+    // * 如果x 是一个函数或者对象， 先把 x.then 的值赋值给 then， 然后判断then的类型， 如果不是函数就直接将 x 传入 resolve 中
+    // * 如果then是函数类型， 那么就将x作为 then 方法的作用域this调用， 并且传入两个回调函数， 第一个是resolvePromise， 第二个是rejectPromise， 两个回调函数都要判断是否执行过函数
+    // * 上面的代码只要有抛错， 就传入reject中执行
+    let called = false;
+    if (x !== null && (typeof x === 'object' || typeof x === 'function')) {
+        try {
+            let then = x.then;
+            if (typeof then === 'function') {
+                then.call(x,
+                    y => {
+                        if (called) return;
+                        called = true;
+                        resolutionProcedure(promise2, y, resolve, reject);
+                    },
+                    e => {
+                        if (called) return;
+                        called = true;
+                        reject(e);
+                    }
+                )
+            } else {
+                resolve(x)
+            }
+        } catch (err) {
+            if (called) return;
+            called = true;
+            reject(err);
+        }
+    } else {
+        resolve(x)
+    }
+}
 ```
 
 ## 原型和原型链

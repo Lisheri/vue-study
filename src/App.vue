@@ -12,7 +12,7 @@ import HelloWorld from "./components/HelloWorld.vue";
 import Actionone from "./components/1.vue";
 import Brother from "./components/brother.vue";
 import SmallBrother from "./components/smallBrother.vue";
-import {isMatch} from './leetCode'
+// import {isMatch} from './leetCode'
 // import {lengthOfLongestSubstring} from './study.ts'
 export default {
   name: "App",
@@ -26,7 +26,7 @@ export default {
   
   // * 用于判断回文子串
   
-  console.info(isMatch("aaaaaaaaaaaaab", "a*a*a*a*a*a*a*a*a*a*a*a*b"));
+  // console.info(isMatch("aaaaaaaaaaaaab", "a*a*a*a*a*a*a*a*a*a*a*a*b"));
   },
   components: {
     HelloWorld,

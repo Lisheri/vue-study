@@ -5,23 +5,32 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "dll": "webpack --progress --config ./webpack.dll.conf.js"
   },
   "dependencies": {
     "@antv/g2": "^4.0.15",
+    "add-asset-html-webpack-plugin": "^3.2.0",
     "ant-design-vue": "^1.6.2",
     "axios": "^0.19.2",
     "babel-helper-vue-jsx-merge-props": "^2.0.3",
+    "babel-loader": "^8.2.2",
     "babel-plugin-jsx-v-model": "^2.0.3",
     "babel-plugin-syntax-jsx": "^6.18.0",
     "babel-plugin-transform-vue-jsx": "^3.7.0",
     "babel-preset-env": "^1.7.0",
+    "clean-webpack-plugin": "^3.0.0",
     "core-js": "^3.6.5",
     "loadsh": "^0.0.4",
     "node-sass": "^4.14.1",
     "sass-loader": "^8.0.2",
+    "thread-loader": "3.0.0",
     "vue": "^2.6.11",
-    "vue-router": "^3.3.4"
+    "vue-router": "^3.3.4",
+    "vxe-table": "2.9.25",
+    "vxe-table-plugin-virtual-tree": "0.5.5",
+    "webpack-cli": "^4.5.0",
+    "xe-utils": "2.7.20"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",
